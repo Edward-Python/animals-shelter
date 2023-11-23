@@ -5,23 +5,32 @@
 3. Порода breed
 4. Пол gender
 """
+import sqlite3
+
 class Shelter:
 
-    def __init__(self, name, breed, age, gender):
-        self.name = name
-        self.breed = breed
-        self.age = age
-        self.gender = gender
-
-    def main(self):
-        list_animal = (
-                       f"Животное: {self.special_characteristic()}\n"
-                       f"---------------\n"
-                       f"Имя: {self.name}\n"
-                       f"Порода: {self.breed}\n"
-                       f"Возраст: {self.age}\n"
-                       f"Пол: {self.gender}\n"              
-                      )
-        print(list_animal)
-        # with open(r"D:\Project\shelter\shelter.txt", "a") as shelter_write:
-        #     shelter_write.write(list_animal + "\n")
+    def __init__(self):    
+        self.db = sqlite3.connect("animal_shelter.db")
+        self.cur = self.db.cursor()
+        self.list_anim = ["animal", "name", "breed", "age", "gender"]
+        
+        self.cur.execute(f"""
+        CREATE TABLE IF NOT EXISTS animals_table (
+                id INTEGER PRIMARY KEY NOT NULL,
+                {self.list_anim[0]} TEXT,
+                {self.list_anim[1]} TEXT,
+                {self.list_anim[2]} TEXT,
+                {self.list_anim[3]} INTEGER,
+                {self.list_anim[4]} TEXT)""")
+        self.db.commit()
+    
+    def main(self, animal, name, breed, age, gender):
+        self.cur.execute(f"""INSERT INTO animals_table (
+                {self.list_anim[0]},
+                {self.list_anim[1]},
+                {self.list_anim[2]},
+                {self.list_anim[3]},
+                {self.list_anim[4]})
+                VALUES (?, ?, ?, ?, ?)""",
+                (animal, name, breed, age, gender))        
+        self.db.commit()

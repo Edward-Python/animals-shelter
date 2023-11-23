@@ -3,51 +3,39 @@ from tkinter import ttk
 from animals import *
 
 
-class Dog(Shelter):
+class InfoAnimals(tk.Frame, Shelter):
 
-    def special_characteristic(self):
-        animal = animals_result.get()
-        return animal  
-
-
-class Cat(Shelter):
-
-    def special_characteristic(self):
-        animal = animals_result.get()
-        return animal
-    
-
-class InfoAnimals(tk.Frame):
-    
-    def __init__(self, master):
-        super().__init__(master)
+    def __init__(self, win):   
+        super().__init__(win)
         self.init_info_animals()
         self.tree_view()
+        self.db = Shelter()
+        self.output()
 
     def init_info_animals(self):
         fr = ttk.Frame().pack()
-        ttk.Button(fr, text="Ввод данных", command=DataAnimals).pack(padx=10, pady=30, anchor="nw")
+        ttk.Button(fr, text="Ввод данных", command=DataAnimals)\
+            .pack(padx=10, pady=30, anchor="nw")
 
     def tree_view(self):
         list_anim = ["animals", "name", "bread", "age", "gender"]
         list_head = ["Животное", "Кличка", "Порода", "Возраст", "Пол"]
         dict_list = dict(zip(list_anim, list_head))
-        self.tree = ttk.Treeview(self, columns=list_anim,
-                                height=26, show="headings")
-        
+        self.tree = ttk.Treeview(self, columns=(list_anim),\
+                                height=26, show="headings")        
         for i in list_anim:
             self.tree.column(i, width=140, anchor=tk.CENTER)
-        
-        # self.tree.column("animals", width=140, anchor=tk.CENTER)
-        # self.tree.column("name", width=140, anchor=tk.CENTER)
-        # self.tree.column("bread", width=140, anchor=tk.CENTER)
-        # self.tree.column("age", width=140, anchor=tk.CENTER)
-        # self.tree.column("gender", width=140, anchor=tk.CENTER)
-
         for k, v in dict_list.items():
             self.tree.heading(k, text=v)
 
         self.tree.pack(expand=True, fill="both")
+
+    def output(self):        
+        self.db.cur.execute("SELECT * FROM animals_table")
+        for i in self.tree.get_children():
+            self.tree.delete(i)
+        for i in self.db.cur.fetchall():
+            self.tree.insert("", "end", values=i[1:])
 
 
 class DataAnimals(tk.Toplevel):    
@@ -61,6 +49,8 @@ class DataAnimals(tk.Toplevel):
         self.cmbox()
         self.radio_button()
         self.btn()
+        self.sh = Shelter()
+        self.app = app        
 
     def init_data_animals(self):
         self.title("Ввод данных")
@@ -70,19 +60,18 @@ class DataAnimals(tk.Toplevel):
         self.focus_set()
 
     def str_var(self):        
-        
+        self.animals_result = tk.StringVar(value="Собака")
         self.name_al = tk.StringVar()
         self.breed_al = tk.StringVar()
         self.age_al = tk.StringVar()
         self.gender_als = tk.StringVar()
 
-    def label(self):
-        
+    def label(self):        
         ttk.Label(self, text="Вы ввели данные:",\
                   font=title_font).place(x=370, y=80)
 
         ttk.Label(self, text="Животное", font=title_font).place(x=240, y=10)
-        ttk.Label(self, textvariable=animals_result).place(x=460, y=105)
+        ttk.Label(self, textvariable=self.animals_result).place(x=460, y=105)
         ttk.Label(self, text="Животное:").place(x=365, y=105)
         
         ttk.Label(self, text="Кличка:").place(x=20, y=100)
@@ -132,24 +121,24 @@ class DataAnimals(tk.Toplevel):
     def cmbox(self):
         self.animal = ["Собака", "Кот"]
         ttk.Combobox(self, font=_font, values=self.animal,\
-                    textvariable=animals_result,\
+                    textvariable=self.animals_result,\
                     state="readonly").place(x=200, y=30)
                 
     def data_animals(self):
-        anim = animals_result.get()
+        anim = self.animals_result.get()
         if anim == "Кот":
-            animals = Cat(name=self.name_al.get(), breed=self.breed_al.get(),\
-                        age=self.age_al.get(), gender=self.gender_animals())
-            animals.main()
+            self.sh.main(animal=anim, name=self.name_al.get(),\
+                         breed=self.breed_al.get(),\
+                         age=self.age_al.get(), gender=self.gender_animals())            
         elif anim == "Собака":
-            animals = Dog(name=self.name_al.get(), breed=self.breed_al.get(),\
-                        age=self.age_al.get(), gender=self.gender_animals())
-            animals.main()
+            self.sh.main(animal=anim, name=self.name_al.get(),\
+                         breed=self.breed_al.get(),\
+                         age=self.age_al.get(), gender=self.gender_animals())            
+        self.app.output()
 
 
 if __name__ == "__main__":
     win = tk.Tk()
-    animals_result = tk.StringVar(value="Собака")
     app = InfoAnimals(win)
     app.pack()
     win.title("Приют для животных")
