@@ -7,6 +7,7 @@
 """
 import sqlite3
 
+
 class Shelter:
 
     def __init__(self):    

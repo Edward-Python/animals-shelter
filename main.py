@@ -3,27 +3,33 @@ from tkinter import ttk
 from animals import *
 
 
-class InfoAnimals(tk.Frame, Shelter):
+class InfoAnimals(tk.Frame):
 
     def __init__(self, win):   
         super().__init__(win)
         self.init_info_animals()
+        self.btn()
         self.tree_view()
         self.db = Shelter()
         self.output()
 
     def init_info_animals(self):
-        fr = ttk.Frame().pack()
-        ttk.Button(fr, text="Ввод данных", command=DataAnimals)\
-            .pack(padx=10, pady=30, anchor="nw")
+        self.fr = ttk.Frame().pack(padx=0, pady=26)
+
+    def btn(self):
+        ttk.Button(self.fr, text="Ввод данных", command=DataAnimals)\
+            .place(x=10, y=13)
+        ttk.Button(self.fr, text="Удаление", command=self.delete_animal)\
+            .place(x=130, y=13)
 
     def tree_view(self):
-        list_anim = ["animals", "name", "bread", "age", "gender"]
-        list_head = ["Животное", "Кличка", "Порода", "Возраст", "Пол"]
+        list_anim = ["id", "animals", "name", "bread", "age", "gender"]
+        list_head = ["№", "Животное", "Кличка", "Порода", "Возраст", "Пол"]
         dict_list = dict(zip(list_anim, list_head))
         self.tree = ttk.Treeview(self, columns=(list_anim),\
-                                height=26, show="headings")        
-        for i in list_anim:
+                                height=26, show="headings")
+        self.tree.column("id", width=30, anchor=tk.CENTER)     
+        for i in list_anim[1:]:
             self.tree.column(i, width=140, anchor=tk.CENTER)
         for k, v in dict_list.items():
             self.tree.heading(k, text=v)
@@ -35,7 +41,14 @@ class InfoAnimals(tk.Frame, Shelter):
         for i in self.tree.get_children():
             self.tree.delete(i)
         for i in self.db.cur.fetchall():
-            self.tree.insert("", "end", values=i[1:])
+            self.tree.insert("", "end", values=i)
+
+    def delete_animal(self):
+        for j in self.tree.selection():
+            self.db.cur.execute("""DELETE FROM animals_table WHERE 
+                                id==?""", (self.tree.set(j, "#1"),))
+            self.db.db.commit()
+            self.tree.delete(j)
 
 
 class DataAnimals(tk.Toplevel):    
