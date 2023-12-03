@@ -33,5 +33,5 @@ class Shelter:
                 {self.list_anim[3]},
                 {self.list_anim[4]})
                 VALUES (?, ?, ?, ?, ?)""",
-                (animal, name, breed, age, gender))        
+                (animal, name, breed, age, gender))
         self.db.commit()

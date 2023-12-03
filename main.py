@@ -21,14 +21,16 @@ class InfoAnimals(tk.Frame):
             .place(x=10, y=13)
         ttk.Button(self.fr, text="Удаление", command=self.delete_animal)\
             .place(x=130, y=13)
+        ttk.Button(self.fr, text="Выход", command=win.destroy)\
+            .place(x=600, y=13)
 
     def tree_view(self):
         list_anim = ["id", "animals", "name", "bread", "age", "gender"]
-        list_head = ["№", "Животное", "Кличка", "Порода", "Возраст", "Пол"]
+        list_head = ["ID", "Животное", "Кличка", "Порода", "Возраст", "Пол"]
         dict_list = dict(zip(list_anim, list_head))
         self.tree = ttk.Treeview(self, columns=(list_anim),\
                                 height=26, show="headings")
-        self.tree.column("id", width=30, anchor=tk.CENTER)     
+        self.tree.column("id", width=40, anchor=tk.CENTER)
         for i in list_anim[1:]:
             self.tree.column(i, width=140, anchor=tk.CENTER)
         for k, v in dict_list.items():
@@ -45,7 +47,7 @@ class InfoAnimals(tk.Frame):
 
     def delete_animal(self):
         for j in self.tree.selection():
-            self.db.cur.execute("""DELETE FROM animals_table WHERE 
+            self.db.cur.execute("""DELETE FROM animals_table WHERE
                                 id==?""", (self.tree.set(j, "#1"),))
             self.db.db.commit()
             self.tree.delete(j)
@@ -120,8 +122,10 @@ class DataAnimals(tk.Toplevel):
             command=self.gender_animals).place(x=200, y=190)
 
     def btn(self):
-        ttk.Button(self, text="готово",\
+        ttk.Button(self, text="Готово",\
                    command=self.data_animals).place(x=420, y=230)
+        ttk.Button(self, text="Закрыть",\
+                   command=self.destroy).place(x=450, y=280)
 
     def gender_animals(self):
         gender_al = self.gender_als.get()
